@@ -21,3 +21,12 @@ const sendEmail = (eventType, data) => {
         console.error(`Error sending email: ${error}`);
     });
 };
+
+exports.firestoreListener = functions.firestore
+    .document("yourCollection/{documentId}")
+    .onWrite((change, context) => {
+        const eventType = change.after.exists ? "updated" : "deleted";
+        const data = change.after.exists ? change.after.data() : change.before.data();
+        sendEmail(eventType, { id: context.params.documentId, data });
+        return null;
+    });
